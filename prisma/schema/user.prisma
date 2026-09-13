@@ -1,0 +1,5 @@
+model user {
+    id   String @id @default(uuid())
+    name String
+    age  Int
+}
