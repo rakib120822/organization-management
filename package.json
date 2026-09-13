@@ -17,6 +17,7 @@
     "lint:fix": "npx @biomejs/biome lint --write ./src"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.13",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/node": "^26.5.1",
