@@ -1,0 +1,66 @@
+enum UserStatus {
+    ACTIVE
+    INACTIVE
+    SUSPENDED
+}
+
+enum UserRole {
+    ADMIN
+    SUPER_ADMIN
+    CUSTOMER
+    USER
+}
+
+enum TeamMemberRole {
+    MEMBER
+    LEAD
+    PROJECT_MANAGER
+}
+
+enum KEY {
+    ENG
+    BACK
+    FRONT
+    FULL
+    API
+    INFRA
+    DEVOPS
+    PLAT
+    ARCH
+    MOBILE
+    IOS
+    ANDROID
+    WEB
+    DATA
+    ML
+    AI
+    QA
+    TEST
+    SEC
+    SRE
+    CLOUD
+    DB
+}
+
+enum ProjectStatus {
+    PLANNING
+    IN_PROGRESS
+    COMPLETED
+    ON_HOLD
+    CANCELLED
+}
+
+enum TaskStatus {
+    PENDING
+    IN_PROGRESS
+    COMPLETED
+    BLOCKED
+    CANCELLED
+}
+
+enum TaskPriority {
+    LOW
+    MEDIUM
+    HIGH
+    CRITICAL
+}

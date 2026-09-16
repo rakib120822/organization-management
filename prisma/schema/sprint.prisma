@@ -1,0 +1,12 @@
+model SPRINT {
+    id          String   @id @default(uuid())
+    name        String
+    description String?
+    projectId   String
+    startDate   DateTime?
+    endDate     DateTime?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    project Project @relation(fields: [projectId], references: [id])
+}

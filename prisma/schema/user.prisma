@@ -1,5 +1,23 @@
 model user {
-    id   String @id @default(uuid())
-    name String
-    age  Int
+    id                  String               @id @default(uuid())
+    name                String
+    email               String               @unique
+    password            String
+    avatarUrl           String?
+    status              UserStatus           @default(ACTIVE)
+    createdAt           DateTime             @default(now())
+    updatedAt           DateTime             @updatedAt
+    role                UserRole             @default(USER)
+    organizations       Organization[]
+    organizationMembers OrganizationMember[]
+
+    teamMembers TeamMember[]
+
+    projects Project[]
+
+    projectMembers ProjectMember[]
+
+    tasks TASK[]
+
+    comments COMMENT[]
 }

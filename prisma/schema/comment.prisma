@@ -1,0 +1,13 @@
+model COMMENT {
+    id        String   @id @default(uuid())
+    taskId    String
+    authorId    String
+    content   String 
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    task TASK @relation(fields: [taskId], references: [id])
+    user user @relation(fields: [authorId], references: [id])
+
+    attachments ATTACHMENT[]
+}
