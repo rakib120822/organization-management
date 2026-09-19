@@ -21,6 +21,7 @@ router.post(
   validationRequest(logInUserSchema),
   authController.logInUser,
 );
+router.post("/refresh-token", authController.refreshToken);
 router.post(
   "/forget-password",
   validationRequest(forgetPasswordSchema),

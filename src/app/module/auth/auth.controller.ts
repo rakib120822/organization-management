@@ -10,6 +10,7 @@ import authService from "./auth.service";
 import { AppError } from "../../utils/app-error";
 import httpStatus from "http-status";
 import { sendResponse } from "../../utils/sendResponse";
+import { config } from "../../config";
 
 const registerUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -34,6 +35,27 @@ const logInUser = catchAsync(
       statusCode: httpStatus.OK,
       message: "Login Successful",
       data: result,
+    });
+  },
+);
+
+const refreshToken = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.cookies.refreshToken ?? req.body?.refreshToken;
+    const accessToken = await authService.refreshToken(token);
+
+    res.cookie("accessToken", accessToken, {
+      maxAge: 900000,
+      httpOnly: true,
+      secure: config.node_env === "production",
+      sameSite: "lax",
+    });
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Access token refreshed successfully",
+      data: { accessToken },
     });
   },
 );
@@ -89,9 +111,10 @@ const verifyEmail = catchAsync(
 const authController = {
   registerUser,
   logInUser,
+  refreshToken,
   forgetPassword,
   resetPassword,
-  verifyEmail
+  verifyEmail,
 };
 
 export default authController;

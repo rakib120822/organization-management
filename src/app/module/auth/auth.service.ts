@@ -13,6 +13,7 @@ import {
 import bcrypt from "bcrypt";
 import httpStatus from "http-status";
 import crypto from "crypto";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { redisClient } from "../../lib/redis";
 import { transporter } from "../../lib/nodemailer";
 import path from "path";
@@ -128,6 +129,46 @@ const logInUser = async (payload: logInUser) => {
   });
 
   return { accessToken, refreshToken, userData };
+};
+
+const refreshToken = async (token: string | undefined) => {
+  if (!token) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Refresh token is required");
+  }
+
+  let decoded: JwtPayload;
+  try {
+    const verifiedToken = jwt.verify(token, config.jwt_refresh_secret);
+    if (typeof verifiedToken === "string" || !verifiedToken.id) {
+      throw new AppError(httpStatus.UNAUTHORIZED, "Invalid refresh token");
+    }
+    decoded = verifiedToken;
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError(httpStatus.UNAUTHORIZED, "Invalid or expired refresh token");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: decoded.id },
+  });
+
+  if (
+    !user ||
+    user.isDeleted ||
+    !user.isVerified ||
+    user.status === UserStatus.INACTIVE ||
+    user.status === UserStatus.SUSPENDED
+  ) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "User is not eligible");
+  }
+
+  return createToken(
+    { id: user.id, email: user.email, role: user.role },
+    config.jwt_access_secret,
+    config.jwt_access_expires_in,
+  );
 };
 
 const forgetPassword = async (payload: forgetPasswordInput) => {
@@ -282,6 +323,7 @@ const verifyEmail = async (payload: { otp: string; email: string }) => {
 const authService = {
   registerUser,
   logInUser,
+  refreshToken,
   forgetPassword,
   resetPassword,
   verifyEmail,
