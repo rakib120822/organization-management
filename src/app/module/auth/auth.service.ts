@@ -316,6 +316,20 @@ const verifyEmail = async (payload: { otp: string; email: string }) => {
   );
 
   // console.log({ accessToken, refreshToken });
+  await redisClient.del([otpKey,userDataKey]);
+  const templatePath = path.join(
+    process.cwd(),
+    "src/app/templates/welcome-email.ejs",
+  );
+  const html = await ejs.renderFile(templatePath, {
+    name: user.name,
+  });
+  await transporter.sendMail({
+    from: config.email_sender,
+    to: user.email,
+    subject: "Password Change",
+    html: html,
+  });
 
   return { user, accessToken, refreshToken };
 };
