@@ -6,6 +6,7 @@ import { config } from "./app/config";
 import authRoutes from "./app/module/auth/auth.route";
 import globalError from "./app/middleware/globalErrorHandler";
 import notFound from "./app/middleware/not-found";
+import userRoutes from "./app/module/user/user.route";
 
 const app: Application = express();
 
@@ -22,7 +23,8 @@ app.use(express.urlencoded({ extended: true }));
 // Middleware to parse JSON bodies
 app.use(express.json());
 
-app.use("/api/v1", authRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/user", userRoutes);
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {
