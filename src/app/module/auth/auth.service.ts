@@ -38,38 +38,46 @@ const registerUser = async (userData: RegisterUser) => {
   );
   // console.log("hashPassword : ", hashPassword);
   const otp = crypto.randomInt(100000, 1000000);
-  console.log("otp : ", otp);
-  await redisClient.set(`otp:${email}`, otp, {
+  await redisClient.set(`registration-otp:${email}`, otp, {
     expiration: {
       type: "EX",
-      value: 60 * 60,
-    },
-  });
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      password: hashPassword,
-      avatarUrl,
+      value: 60 * 5,
     },
   });
 
-  const JwtPayload = { id: user.id, email: user.email, role: user.role };
-
-  const accessToken = await createToken(
-    JwtPayload,
-    config.jwt_access_secret,
-    config.jwt_access_expires_in,
+  const redisUserData = {
+    name,
+    email,
+    password: hashPassword,
+    avatarUrl,
+  };
+  await redisClient.set(
+    `redisUserdata:${email}`,
+    JSON.stringify(redisUserData),
+    {
+      expiration: {
+        type: "EX",
+        value: 60 * 5,
+      },
+    },
   );
-  const refreshToken = await createToken(
-    JwtPayload,
-    config.jwt_refresh_secret,
-    config.jwt_refresh_expires_in,
+
+  const templatePath = path.join(
+    process.cwd(),
+    "src/app/templates/email-verification.ejs",
   );
+  const html = await ejs.renderFile(templatePath, {
+    otp,
+    name,
+  });
+  await transporter.sendMail({
+    from: config.email_sender,
+    to: email,
+    subject: "Verification",
+    html: html,
+  });
 
-  // console.log({ accessToken, refreshToken });
-
-  return { user, accessToken, refreshToken };
+  return null;
 };
 
 const logInUser = async (payload: logInUser) => {
@@ -217,11 +225,66 @@ const resetPassword = async (payload: resetPasswordInput) => {
   });
 };
 
+const verifyEmail = async (payload: { otp: string; email: string }) => {
+  const userDataKey = `redisUserdata:${payload.email}`;
+  const redisUserData = await redisClient.get(userDataKey);
+  const otpKey = `registration-otp:${payload.email}`;
+  const redisOtp = await redisClient.get(otpKey);
+  if (!redisUserData) {
+    throw new AppError(httpStatus.NOT_FOUND, "Invalid User");
+  }
+  if (!redisOtp) {
+    throw new AppError(httpStatus.NOT_FOUND, "OTP Expired");
+  }
+  if (redisOtp != payload.otp) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid OTP");
+  }
+  const userData = JSON.parse(redisUserData);
+  console.log(userData);
+  await prisma.user.create({
+    data: {
+      name: userData.name,
+      email: userData.email,
+      password: userData.password,
+      isVerified: true,
+    },
+  });
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email: payload.email,
+    },
+    omit: {
+      password: true,
+    },
+  });
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+  const JwtPayload = { id: user.id, email: user.email, role: user.role };
+
+  const accessToken = await createToken(
+    JwtPayload,
+    config.jwt_access_secret,
+    config.jwt_access_expires_in,
+  );
+  const refreshToken = await createToken(
+    JwtPayload,
+    config.jwt_refresh_secret,
+    config.jwt_refresh_expires_in,
+  );
+
+  // console.log({ accessToken, refreshToken });
+
+  return { user, accessToken, refreshToken };
+};
+
 const authService = {
   registerUser,
   logInUser,
   forgetPassword,
   resetPassword,
+  verifyEmail,
 };
 
 export default authService;

@@ -2,6 +2,7 @@ import { Router } from "express";
 import authController from "./auth.controller";
 import { validationRequest } from "../../middleware/zodValidation";
 import {
+  emailVerifySchema,
   forgetPasswordSchema,
   logInUserSchema,
   resetPasswordSchema,
@@ -30,6 +31,10 @@ router.post(
   validationRequest(resetPasswordSchema),
   authController.resetPassword,
 );
-
+router.post(
+  "/verify-email",
+  validationRequest(emailVerifySchema),
+  authController.verifyEmail,
+);
 const authRoutes = router;
 export default authRoutes;

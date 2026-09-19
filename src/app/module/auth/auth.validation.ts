@@ -69,4 +69,9 @@ export const resetPasswordSchema = z.object({
   otp: z.string("Please provide otp"),
 });
 
+export const emailVerifySchema = z.object({
+  email: z.email("Email is required"),
+  otp: z.string("Invalid OTP"),
+});
+
 export type UserInput = z.infer<typeof userSchema>;

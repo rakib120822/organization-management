@@ -5,6 +5,7 @@ import httpStatus from "http-status";
 import { config } from "./app/config";
 import authRoutes from "./app/module/auth/auth.route";
 import globalError from "./app/middleware/globalErrorHandler";
+import notFound from "./app/middleware/not-found";
 
 const app: Application = express();
 
@@ -31,6 +32,7 @@ app.get("/", async (req: Request, res: Response) => {
   });
 });
 
+app.use(notFound)
 app.use(globalError);
 
 export default app;
