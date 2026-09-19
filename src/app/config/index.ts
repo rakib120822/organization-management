@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import path from "path";
+import { email } from "zod";
 
 dotenv.config({ path: path.join(process.cwd(), ".env") });
 
@@ -15,4 +16,11 @@ export const config = {
   jwt_access_expires_in: process.env.JWT_ACCESS_EXPIRES_IN!,
   jwt_refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN!,
   google_client_id: process.env.GOOGLE_CLIENT_ID!,
+  redis_user: process.env.REDIS_USER!,
+  redis_password: process.env.REDIS_PASSWORD!,
+  redis_host: process.env.REDIS_HOST!,
+  redis_port: process.env.REDIS_PORT!,
+  smtp_user: process.env.SMTP_USER!,
+  smtp_password: process.env.SMTP_PASSWORD!,
+  email_sender: process.env.EMAIL_SENDER!,
 };

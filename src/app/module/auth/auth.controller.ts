@@ -1,6 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import catchAsync from "../../utils/catchAsync";
-import { logInUserSchema, userSchema } from "./auth.validation";
+import {
+  forgetPasswordSchema,
+  logInUserSchema,
+  resetPasswordSchema,
+  userSchema,
+} from "./auth.validation";
 import authService from "./auth.service";
 import { AppError } from "../../utils/app-error";
 import httpStatus from "http-status";
@@ -44,7 +49,7 @@ const logInUser = catchAsync(
     }
 
     const result = await authService.logInUser(body.data);
-    console.log(result);
+    // console.log(result);
     res.cookie("accessToken", result.accessToken, {
       maxAge: 900000, // Expires after 15 minutes (in milliseconds)
       httpOnly: true, // Prevents client-side JavaScript access (highly recommended)
@@ -68,6 +73,42 @@ const logInUser = catchAsync(
   },
 );
 
-const authController = { registerUser, logInUser };
+const forgetPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const payload = forgetPasswordSchema.safeParse(req.body);
+    if (!payload.success) {
+      throw new AppError(httpStatus.BAD_REQUEST, "Something is wrong");
+    }
+    await authService.forgetPassword(payload.data);
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "otp send in your email",
+      data: null,
+    });
+  },
+);
+const resetPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const payload = resetPasswordSchema.safeParse(req.body);
+    if (!payload.success) {
+      throw new AppError(httpStatus.BAD_REQUEST, "Something is wrong");
+    }
+    await authService.resetPassword(payload.data);
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Password change successful",
+      data: null,
+    });
+  },
+);
+
+const authController = {
+  registerUser,
+  logInUser,
+  forgetPassword,
+  resetPassword,
+};
 
 export default authController;

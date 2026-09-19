@@ -15,3 +15,12 @@ export interface logInUser {
   email: string;
   password: string;
 }
+
+export interface forgetPasswordInput {
+  email: string;
+}
+export interface resetPasswordInput {
+  email: string;
+  password: string;
+  otp: string;
+}
