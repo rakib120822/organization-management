@@ -11,6 +11,12 @@ enum UserRole {
     USER
 }
 
+enum OrganizationMemberRole {
+    MEMBER
+    ADMIN
+    OWNER
+}
+
 enum TeamMemberRole {
     MEMBER
     LEAD

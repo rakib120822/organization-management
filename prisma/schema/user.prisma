@@ -23,4 +23,6 @@ model user {
     tasks TASK[]
 
     comments COMMENT[]
+
+    invitations Invitation[]
 }

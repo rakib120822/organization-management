@@ -7,10 +7,10 @@ import { auth } from "../../middleware/auth";
 const router: Router = Router();
 
 router.patch(
-  "/upload-profile",
-  auth(),
-  upload.single("image"),
-  userController.uploadProfileImage,
+	"/upload-profile",
+	auth(),
+	upload.single("image"),
+	userController.uploadProfileImage,
 );
 
 const userRoutes = router;
